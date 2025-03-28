@@ -393,7 +393,7 @@ const Hero = () => {
     <section
       className="h-[800px] bg-no-repeat bg-cover bg-center py-24"
       style={{
-        background: "linear-gradient(to bottom, #f5AAEA 0%, #fDF2FF 100%)",
+        background: "linear-gradient(to bottom, #3ee7ff 0%, #22ffbc 50%, #ffffff 100%)",
       }}
     >
       <div className="container mx-auto flex justify-around h-full">
