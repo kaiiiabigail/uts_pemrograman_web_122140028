@@ -1,8 +1,8 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { IoMdArrowForward } from "react-icons/io";
 import { FiTrash2 } from "react-icons/fi";
-import { BsEmojiFrown, BsBagCheck } from "react-icons/bs";
+import { BsEmojiFrown, BsBagCheck, BsCreditCard } from "react-icons/bs";
 import CartItem from "../components/CartItem";
 import { SidebarContext } from "../contexts/SidebarContext";
 import { CartContext } from "../contexts/CartContext";
@@ -11,8 +11,9 @@ import Swal from "sweetalert2";
 const Sidebar = () => {
   const { isOpen, handleClose } = useContext(SidebarContext);
   const { cart, clearCart, total, itemAmount } = useContext(CartContext);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  const handleCheckout = (e) => {
+  const handleCheckout = async (e) => {
     e.preventDefault();
 
     if (cart.length === 0) {
@@ -33,29 +34,121 @@ const Sidebar = () => {
       return;
     }
 
-    Swal.fire({
-      title: "Checkout Successful!",
-      html: `
-        <div class="flex flex-col items-center">
-          <div class="text-green-500 text-6xl mb-4">
-            <BsBagCheck />
-          </div>
-          <p class="text-lg">Your order has been placed successfully!</p>
-          <p class="text-sm text-gray-500 mt-2">Order #${Math.floor(
-            Math.random() * 1000000
-          )}</p>
+ 
+    const { value: formValues } = await Swal.fire({
+      title: "Payment Information",
+      html: `<div class="text-left mb-4">
+          <p class="font-semibold">Total Amount: $${total.toFixed(2)}</p>
         </div>
-      `,
-      confirmButtonText: "Continue Shopping",
+        <input 
+          id="cardNumber" 
+          type="text" 
+          class="swal2-input mb-2" 
+          placeholder="Card Number (4242 4242 4242 4242)"
+          pattern="[0-9\\s]{16,19}"
+          required
+        >
+        <div class="flex gap-2">
+          <input 
+            id="expiryDate" 
+            type="text" 
+            class="swal2-input" 
+            placeholder="MM/YY (12/25)"
+            pattern="(0[1-9]|1[0-2])\\/([0-9]{2})"
+            required
+          >
+          <input 
+            id="cvc" 
+            type="text" 
+            class="swal2-input" 
+            placeholder="CVC (123)"
+            pattern="[0-9]{3,4}"
+            required
+          >
+        </div>
+        <input 
+          id="nameOnCard" 
+          type="text" 
+          class="swal2-input" 
+          placeholder="Name on Card"
+          required
+        >`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Pay Now",
+      cancelButtonText: "Cancel",
       confirmButtonColor: "#4f46e5",
       background: "#f8f9fa",
-      allowOutsideClick: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        clearCart();
-        window.location.href = "/";
-      }
+      preConfirm: () => {
+        return {
+          cardNumber: document.getElementById("cardNumber").value,
+          expiryDate: document.getElementById("expiryDate").value,
+          cvc: document.getElementById("cvc").value,
+          nameOnCard: document.getElementById("nameOnCard").value,
+        };
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
     });
+
+    if (!formValues) return;
+
+
+    if (
+      !formValues.cardNumber ||
+      !formValues.expiryDate ||
+      !formValues.cvc ||
+      !formValues.nameOnCard
+    ) {
+      Swal.showValidationMessage("Please fill all payment details");
+      return;
+    }
+
+  
+    setIsProcessingPayment(true);
+    Swal.fire({
+      title: "Processing Payment...",
+      html: "Please wait while we process your payment",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+
+    setTimeout(() => {
+      setIsProcessingPayment(false);
+      Swal.fire({
+        title: "Payment Successful!",
+        html: `
+          <div class="flex flex-col items-center">
+            <div class="text-green-500 text-6xl mb-4">
+              <BsBagCheck />
+            </div>
+            <p class="text-lg">Your order has been placed successfully!</p>
+            <p class="text-sm text-gray-500 mt-2">Order #${Math.floor(
+              Math.random() * 1000000
+            )}</p>
+            <div class="mt-4 p-3 bg-gray-100 rounded-lg w-full">
+              <p class="text-sm font-medium">Payment Details</p>
+              <p class="text-xs mt-1">Amount: $${total.toFixed(2)}</p>
+              <p class="text-xs">Card: **** **** **** ${formValues.cardNumber.slice(
+                -4
+              )}</p>
+            </div>
+          </div>
+        `,
+        confirmButtonText: "Continue Shopping",
+        confirmButtonColor: "#4f46e5",
+        background: "#f8f9fa",
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          clearCart();
+          handleClose();
+          window.location.href = "/";
+        }
+      });
+    }, 2000);
   };
 
   return (
@@ -106,7 +199,7 @@ const Sidebar = () => {
         )}
       </div>
 
-      {/* Footer */}
+ 
       <div className="py-4 bg-white">
         <div className="flex justify-between items-center mb-4">
           <div className="font-semibold text-lg">
@@ -142,14 +235,20 @@ const Sidebar = () => {
           </Link>
           <button
             onClick={handleCheckout}
-            disabled={cart.length === 0}
-            className={`block p-3 text-center w-full font-medium rounded-lg transition-all duration-200 ${
-              cart.length === 0
+            disabled={cart.length === 0 || isProcessingPayment}
+            className={`block p-3 text-center w-full font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+              cart.length === 0 || isProcessingPayment
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-primary to-primary-dark text-white hover:shadow-md hover:opacity-90"
             }`}
           >
-            Checkout Now
+            {isProcessingPayment ? (
+              "Processing..."
+            ) : (
+              <>
+                <BsCreditCard /> Checkout Now
+              </>
+            )}
           </button>
         </div>
 

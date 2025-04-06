@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { SidebarContext } from "../contexts/SidebarContext";
 import { CartContext } from "../contexts/CartContext";
 import { BsBag } from "react-icons/bs";
-import { Link } from 'react-router-dom';
-import Logo from '../img/logo.svg';
+import { Link } from "react-router-dom";
+import Logo from "../img/logo.svg";
 
 const Header = () => {
   const [isActive, setIsActive] = useState(false);
@@ -14,22 +14,26 @@ const Header = () => {
     const handleScroll = () => {
       window.scrollY > 60 ? setIsActive(true) : setIsActive(false);
     };
-    window.addEventListener('scroll', handleScroll);
-    
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <header className={`${isActive ? 'bg-white py-4 shadow-md' : 'bg-none py-6'} fixed w-full z-10 transition-all`}>
+    <header
+      className={`${
+        isActive ? "bg-white py-4 shadow-md" : "bg-none py-6"
+      } fixed w-full z-10 transition-all`}
+    >
       <div className="container mx-auto flex items-center justify-between h-full">
-        {/* logo */}
-        <Link to={'/'}>
+ 
+        <Link to={"/"}>
           <div>
             <img className="w-[40px]" src={Logo} alt="Logo" />
           </div>
         </Link>
-        
-        {/* cart */}
+
+  
         <div
           onClick={() => setIsOpen(!isOpen)}
           className="cursor-pointer flex relative"

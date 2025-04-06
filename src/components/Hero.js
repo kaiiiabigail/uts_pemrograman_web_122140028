@@ -289,13 +289,13 @@ const RotatingText = forwardRef((props, ref) => {
 
 RotatingText.displayName = "RotatingText";
 
-// Komponen BlurText
+
 const BlurText = ({
   text = "",
   delay = 200,
   className = "",
-  animateBy = "words", // 'words' or 'letters'
-  direction = "top", // 'top' or 'bottom'
+  animateBy = "words", 
+  direction = "top", 
   threshold = 0.1,
   rootMargin = "0px",
   animationFrom,
@@ -308,7 +308,7 @@ const BlurText = ({
   const ref = useRef();
   const animatedCount = useRef(0);
 
-  // Default animations based on direction
+
   const defaultFrom =
     direction === "top"
       ? {
@@ -387,7 +387,7 @@ const BlurText = ({
   );
 };
 
-// Komponen Hero Utama
+
 const Hero = () => {
   return (
     <section
@@ -397,7 +397,7 @@ const Hero = () => {
       }}
     >
       <div className="container mx-auto flex justify-around h-full">
-        {/* text */}
+
         <div className="flex flex-col justify-center">
           <div className="font-semibold flex items-center uppercase">
             <div className="w-10 h-[2px] bg-red-500 mr-3"></div>
@@ -473,7 +473,7 @@ const Hero = () => {
           </Link>
         </div>
 
-        {/* image */}
+
         <div className="hidden lg:block">
           <img src={Womanimg} alt="Woman fashion" />
         </div>
